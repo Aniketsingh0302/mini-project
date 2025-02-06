@@ -47,11 +47,13 @@ class flashcard:
                 break
 
             del self.question[category][key]
+            
         
             
             
 fc = flashcard()
 fc.quiz()
+
 print("---------The quiz is over------ ")
 
 
