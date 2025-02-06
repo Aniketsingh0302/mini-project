@@ -7,4 +7,4 @@ country_code= {
 countryName = input("Enter the country name :")
 print(country_code.get(countryName,"Not present in the dictionary"))
    
-    
+  
