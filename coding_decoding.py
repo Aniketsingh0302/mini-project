@@ -9,7 +9,7 @@ if choice == 1:
     if len(msg) <=3:
         coded = reverse(msg)
     else:
-         replaced_code =  msg.replace("a","@#")
+         replaced_code =  msg.replace("a","@#",50)
          coded =reverse(replaced_code)
 
     print(coded)
@@ -19,7 +19,7 @@ elif choice == 2:
      if len(coded) <=3:
           print(reverse(coded))
      else:
-         replace_code = coded.replace("#@","a")
+         replace_code = coded.replace("#@","a",50)
          decode = reverse(replace_code)
          print(decode)
 else:
