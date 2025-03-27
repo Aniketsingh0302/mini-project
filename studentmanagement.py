@@ -1,5 +1,9 @@
 from tkinter import * 
 import time 
+from tkinter import ttk
+from tkinter import messagebox
+from tkinter.ttk import Treeview
+import pymysql
 #----------------------------------------->buttons
 def addstudent():
     addroot= Toplevel(master=entry_frame)
@@ -15,6 +19,7 @@ def addstudent():
     emailval=StringVar()
     addressval=StringVar()
     genderval=StringVar()
+    dobval=StringVar()
     idval=StringVar()
     identry=Entry(addroot,font=('chiller',20,'bold'),bd=5,textvariable=idval,width=13)
     identry.place(x=250,y=10)
@@ -38,8 +43,12 @@ def addstudent():
     addresslabel.place(x=10,y=310)
     addressentry=Entry(addroot,font=('chiller',20,'bold'),bd=5,textvariable=addressval,width=13)
     addressentry.place(x=250,y=310)
-    submit=Button(addroot,text="Submit",width=18,font=('times', 14,'bold'),relief=RIDGE,borderwidth=5,bg='red',activebackground='LightYellow2')
-    submit.place(x=10,y=390)
+    doblabel= Label(addroot,text='Enter D.O.B',bg='coral1',font=('chiller',20,'bold'),relief=GROOVE,borderwidth=3,width=20)
+    doblabel.place(x=10,y=370)
+    dobentry=Entry(addroot,font=('chiller',20,'bold'),bd=5,textvariable=dobval,width=13)
+    dobentry.place(x=250,y=370)
+    submit=Button(addroot,text="Submit",width=12,font=('times', 14,'bold'),relief=RIDGE,borderwidth=5,bg='red',activebackground='LightYellow2')
+    submit.place(x=10,y=420)
     addroot.mainloop()
 def search():
     searchroot= Toplevel(master=entry_frame)
@@ -56,6 +65,7 @@ def search():
     addressval=StringVar()
     genderval=StringVar()
     idval=StringVar()
+    dobval=StringVar()
     identry=Entry(searchroot,font=('chiller',20,'bold'),bd=5,textvariable=idval,width=13)
     identry.place(x=250,y=10)
     namelabel= Label(searchroot,text='Enter Name',bg='coral1',font=('chiller',20,'bold'),relief=GROOVE,borderwidth=3,width=20)
@@ -78,8 +88,12 @@ def search():
     addresslabel.place(x=10,y=310)
     addressentry=Entry(searchroot,font=('chiller',20,'bold'),bd=5,textvariable=addressval,width=13)
     addressentry.place(x=250,y=310)
-    submit=Button(searchroot,text="Submit",width=18,font=('times', 14,'bold'),relief=RIDGE,borderwidth=5,bg='red',activebackground='LightYellow2')
-    submit.place(x=10,y=390)
+    doblabel= Label(searchroot,text='Enter D.O.B',bg='coral1',font=('chiller',20,'bold'),relief=GROOVE,borderwidth=3,width=20)
+    doblabel.place(x=10,y=370)
+    dobentry=Entry(searchroot,font=('chiller',20,'bold'),bd=5,textvariable=dobval,width=13)
+    dobentry.place(x=250,y=370)
+    submit=Button(searchroot,text="Submit",width=12,font=('times', 14,'bold'),relief=RIDGE,borderwidth=5,bg='red',activebackground='LightYellow2')
+    submit.place(x=10,y=420)
     searchroot.mainloop()
 def delete():
     deleteroot=Toplevel(master=entry_frame)
@@ -95,6 +109,7 @@ def delete():
     emailval=StringVar()
     addressval=StringVar()
     genderval=StringVar()
+    dobval=StringVar()
     idval=StringVar()
     identry=Entry(deleteroot,font=('chiller',20,'bold'),bd=5,textvariable=idval,width=13)
     identry.place(x=250,y=10)
@@ -118,12 +133,44 @@ def delete():
     addresslabel.place(x=10,y=310)
     addressentry=Entry(deleteroot,font=('chiller',20,'bold'),bd=5,textvariable=addressval,width=13)
     addressentry.place(x=250,y=310)
-    submit=Button(deleteroot,text="Submit",width=18,font=('times', 14,'bold'),relief=RIDGE,borderwidth=5,bg='red',activebackground='LightYellow2')
-    submit.place(x=10,y=390)
+    doblabel= Label(deleteroot,text='Enter D.O.B',bg='coral1',font=('chiller',20,'bold'),relief=GROOVE,borderwidth=3,width=20)
+    doblabel.place(x=10,y=370)
+    dobentry=Entry(deleteroot,font=('chiller',20,'bold'),bd=5,textvariable=dobval,width=13)
+    dobentry.place(x=250,y=370)
+    submit=Button(deleteroot,text="Submit",width=12,font=('times', 14,'bold'),relief=RIDGE,borderwidth=5,bg='red',activebackground='LightYellow2')
+    submit.place(x=10,y=420)
     deleteroot.mainloop()
 
 #----------------------------------------->connect to database
 def connectdb():
+    def connect():
+        global con,mycursor
+        host=hostval.get()
+        user=userval.get()
+        password=passwordval.get()
+        try:
+            con=pymysql.connect(host=host,user=user,password=password)
+            mycursor=con.cursor()
+        except:
+            messagebox.showerror("Error","Connection failed")
+            return
+        try:
+            strr='create database studentManagement'
+            mycursor.execute(strr)
+            strr='use studentManagement'
+            mycursor.execute(strr)
+            strr='create table studentdata(ID int,name varchar(20),mobile varchar(10),email varchar(30),address varchar(100),gender varchar(10),dob varchar(10))'
+            mycursor.execute(strr)
+            strr='alter table studentdata modify column ID not null'
+            mycursor.execute(strr)
+            strr='alter table studentdata modify column ID int primary key'
+            mycursor.execute(strr)
+            messagebox.showinfo('Notification','Connected',parent=dbroot)
+        except:
+            strr='use studentManagement'
+            mycursor.execute(strr)
+            messagebox.showinfo('Notification','Connected',parent=dbroot)
+        dbroot.destroy()
     dbroot= Toplevel()
     dbroot.geometry('470x250')
     dbroot.grab_set()
@@ -140,12 +187,14 @@ def connectdb():
     hostval=StringVar()
     userval=StringVar()
     passwordval=StringVar()
-    hostentry=Entry(dbroot,width=20,borderwidth=3,font=("Times New Roman", 12, "italic"),relief=GROOVE,bd=5)
+    hostentry=Entry(dbroot,width=20,borderwidth=3,font=("Times New Roman", 12, "italic"),relief=GROOVE,bd=5,textvariable=hostval)
     hostentry.place(x=150,y=10)
-    userentry=Entry(dbroot,width=20,borderwidth=3,font=("Times New Roman", 12, "italic"),relief=GROOVE,bd=5)
+    userentry=Entry(dbroot,width=20,borderwidth=3,font=("Times New Roman", 12, "italic"),relief=GROOVE,bd=5,textvariable=userval)
     userentry.place(x=150,y=70)
-    passwordentry=Entry(dbroot,width=20,borderwidth=3,font=("Times New Roman", 12, "italic"),relief=GROOVE,bd=5)
+    passwordentry=Entry(dbroot,width=20,borderwidth=3,font=("Times New Roman", 12, "italic"),relief=GROOVE,bd=5,textvariable=passwordval ,show='*')
     passwordentry.place(x=159,y=130)
+    submit=Button(dbroot,text="Submit",width=12,font=('times', 14,'bold'),relief=RIDGE,borderwidth=5,bg='OliveDrab1',activebackground='LightYellow2',command=connect)
+    submit.place(x=10,y=190)
     dbroot.mainloop()
 
 def tik():
@@ -169,8 +218,25 @@ searchbtn=Button(entry_frame,text=' Search Student',width=25,font=("Times New Ro
 searchbtn.pack(side=TOP,expand=True)
 deletebtn=Button(entry_frame,text=' Delete Student',width=25,font=("Times New Roman", 12, "italic"),bd=6,activebackground='seashell4',command=addstudent)
 deletebtn.pack(side=TOP,expand=True)
+#------------------------------------------------------------------------------>show data frame
 showDataFrame = Frame(root,bg='seashell3',relief=GROOVE,borderwidth=5)
 showDataFrame.place(x=550,y=80,width=600,height=400)
+style=ttk.Style
+scroll_x=Scrollbar(showDataFrame,orient=HORIZONTAL)
+scroll_y=Scrollbar(showDataFrame,orient=VERTICAL)
+studenttable=Treeview(showDataFrame,columns=('ID','Name','M.No','E-mail','Address','D.O.B'),yscrollcommand=scroll_y.set,xscrollcommand=scroll_x.set)
+scroll_x.pack(side=BOTTOM,fill=X)
+scroll_y.pack(side=RIGHT,fill=Y)
+scroll_x.config(command=studenttable.xview)
+scroll_y.config(command=studenttable.yview)
+studenttable.heading('ID',text='ID')
+studenttable.heading('Name',text='Name')
+studenttable.heading('M.No',text='M.no')
+studenttable.heading('E-mail',text='E-mail')
+studenttable.heading('Address',text='Address')
+studenttable.heading('D.O.B',text='D.O.B')
+studenttable['show']='headings'
+studenttable.pack(fill=BOTH,expand=1)
 #--------------------------------------------------------------------------->slides
 ss='Student Management'
 slide1 = Label(root, text=ss, font=('Arial', 9), bg='seaGreen3',relief=GROOVE,borderwidth=5)
